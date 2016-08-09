@@ -1,5 +1,7 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE FlexibleContexts #-} 
+
+module Text.XMLParser where
 import Text.ParserCombinators.Parsec 
 import Control.Monad
 import Data.Monoid
