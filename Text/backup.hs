@@ -1,12 +1,6 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE FlexibleContexts #-} 
-module Text.XMLParser (
-  xmlParser
- ,parseXML
- ,showXML
-)
-
- where
+--module Text.XMLParser where
 import Text.ParserCombinators.Parsec 
 import Control.Monad
 import Data.Monoid
@@ -16,11 +10,11 @@ import Data.Char
 
 keys = map fst
 escapeCodes = 
-  [("gt",'>')
-  ,("lt",'<')
-  ,("amp",'&')
-  ,("quot",'\"')
-  ,("apos",'\'')]
+  [("gt",">")
+  ,("lt","<")
+  ,("amp","&")
+  ,("quot","\"")
+  ,("apos","'")]
 
 
 data Tag = Tag [(String,String)] String (Maybe [Tag])
@@ -86,18 +80,18 @@ groupEithers xs = map (\xs@(x:_) -> either (const (Left (lefts xs))) (const (Rig
 
 closedTag = do
  (x,a) <- openTag
- let cd = fmap Left cdata
- let frag = fmap Left fragmentParse
- let text = fmap Right (noneOf "><") 
- y <- manyTill (try cd <|> try frag <|> text) (try $ closeTag x)
- let s = map (either head ( TagString . replaceEntities )) (groupEithers y)
+ let cd = cdata >>= return . Left
+ let frag = fragmentParse >>= return . Left
+ let text = (noneOf "><") >>= return .Right
+ y <- manyTill (try cdata <|> try frag <|> text) (try $ closeTag x)
+ let s = map (either head TagString) (groupEithers y)
  return (Tag a x (Just s))
   
 fragmentParse = do
   b <- closedTag  
   return b
 
-xmlParser = do 
+fullParser = do 
             x <- try tagWithoutContent <|> fragmentParse 
             eof 
             return x
@@ -105,20 +99,20 @@ xmlParser = do
 showAttribute (x,y) = x++"="++"\""++y++"\""
 showAttributes atts = concat $ intersperse " " $ map showAttribute atts 
 
-showXML (Tag attr str inner) = case inner of 
+showTag (Tag attr str inner) = case inner of 
    Nothing -> "<"++str++attr''++"/>"
-   (Just xs) -> "<"++str++attr''++">"++(concatMap showXML xs)++"</"++str++">"
+   (Just xs) -> "<"++str++attr''++">"++(concatMap showTag xs)++"</"++str++">"
    where attr'' = if null attr' then attr'
                                 else " "++attr'
          attr' = showAttributes attr
-showXML (TagString str) = str
-showXML (TagCData str) =str
+showTag (TagString str) = str
+showTag (TagCData str) =str
 
-escapeCode = do
-             char '&'
-             x <- choice (map (\(k,v) -> string k >> return v ) escapeCodes)
+escapeCode = do 
+             char '&' 
+             x <- choice (map string (keys escapeCodes) ) 
              char ';'
-             return [x]
+             return x
 
 w = parse escapeCode "" "&lt;"
 
@@ -131,8 +125,6 @@ cdata' = do
     
 q = parse cdata "" "<![CDATA[ hi  ]]>"
 
-replaceEntities = (\(Right x) -> x) . parse (replaceParser' escapeCode) ""
-
 replaceParser parser = (\(Right x) ->x) .  parse (replaceParser' parser) "" 
 
 replaceParser' parser = replaceParser'' parser (anyChar >>=(return . (:[])))
@@ -141,11 +133,8 @@ replaceParser'' parser p2 = do
         	            xs <- many (try parser <|> p2 )
                             return (concat xs)
 
-
-parseXML = parse xmlParser ""
-
 main = do 
-       let str = "<one green=\"blue\"> &lt; five <two>  <![CDATA[ hello  </two>  ]]>   </two> </one>"
+       let str = "<one green=\"blue\"> five <two>  i  </two> </one>"
        print str
-       let rs =  map (parse xmlParser "") [str,"<single/>","<nocont></nocont>"]
-       mapM_ (either (const (print "fail")) (\x -> mapM_ putStrLn [showXML x,show x] )) rs
+       let rs =  map (parse fullParser "") [str,"<single/>","<nocont></nocont>"]
+       mapM_ (either (const (print "fail")) (\x -> mapM_ putStrLn [showTag x,show x] )) rs
