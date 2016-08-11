@@ -86,7 +86,7 @@ groupEithers xs = map (\xs@(x:_) -> either (const (Left (lefts xs))) (const (Rig
 
 closedTag = do
  (x,a) <- openTag
- let cd = fmap Left cdata
+ let cd = fmap Right cdata'
  let frag = fmap Left fragmentParse
  let text = fmap Right (noneOf "><") 
  y <- manyTill (try cd <|> try frag <|> text) (try $ closeTag x)
