@@ -88,9 +88,9 @@ closedTag = do
  (x,a) <- openTag
  let cd = fmap Right cdata'
  let frag = fmap Left fragmentParse
- let text = fmap Right (noneOf "><") 
- y <- manyTill (try cd <|> try frag <|> text) (try $ closeTag x)
- let s = map (either head ( TagString . replaceEntities )) (groupEithers y)
+ let text = fmap Right (noneOf "><" >>= return . (:[]) ) 
+ y <- manyTill ( try cd <|> try frag <|> text) (try $ closeTag x)
+ let s = map (either head ( TagString . replaceEntities . concat )) (groupEithers y)
  return (Tag a x (Just s))
   
 fragmentParse = do
