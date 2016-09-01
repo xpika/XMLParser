@@ -5,7 +5,7 @@ module Text.XMLParser.XMLParser (
   xmlParser
  ,parseXML
  ,showXML
- ,Tag
+ ,Tag(..)
 ) where
 
 import Text.ParserCombinators.Parsec 
