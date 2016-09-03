@@ -3,8 +3,7 @@ module Text.XMLParser.Util (
  getTagOfNameChildren
 ,getTagsByName
 ,getNonEmptyTagOfNameChildren
---,getNonEmptyTagsByName
-
+,getNonEmptyTagsByName
 ) where 
 
 import Text.XMLParser.XMLParser
