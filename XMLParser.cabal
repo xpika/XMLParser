@@ -1,5 +1,5 @@
 name: XMLParser
-version: 0.1.0.5
+version: 0.1.0.6
 cabal-version: >=1.10
 build-type: Simple
 license: GPL-3
@@ -20,6 +20,10 @@ source-repository head
     location: http://github.com/xpika/XMLParser.git
 
 library
+    hs-source-dirs: src
+    other-modules:
+          Text.XMLParser.XMLParser
+        , Text.XMLParser.Util
     exposed-modules:
         Text.XMLParser
     build-depends:
