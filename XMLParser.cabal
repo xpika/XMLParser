@@ -1,5 +1,5 @@
 name: XMLParser
-version: 0.1.0.7
+version: 0.1.0.8
 cabal-version: >=1.10
 build-type: Simple
 license: GPL-3
@@ -27,8 +27,8 @@ library
     exposed-modules:
         Text.XMLParser
     build-depends:
-        base >=4.9 && <4.10,
-        parsec >=3.1 && <3.2
+        base <10000,
+        parsec <10000
     default-language: Haskell2010
     default-extensions: Safe
     other-extensions: NoMonomorphismRestriction FlexibleContexts
